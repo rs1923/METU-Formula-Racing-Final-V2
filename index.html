@@ -1,0 +1,702 @@
+<!-- METU Formula Racing - F1 Edition Reaction Test -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>METU Racing - F1 Refleks Testi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Orbitron:wght@500;700;900&family=Titillium+Web:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --odtu-red: #ba0c2f;
+      --f1-red: #e10600;
+      --f1-dark: #15151e;
+      --f1-light: #f3f3f3;
+      --f1-purple: #c026d3; /* Fastest lap purple */
+      --racing-gold: #fbbf24;
+      --silver: #cbd5e1;
+      --bronze: #d97706;
+      --bg-dark: #0a0c10;
+      --font-display: 'Orbitron', sans-serif;
+      --font-f1: 'Titillium Web', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% -20%, rgba(186, 12, 47, 0.15) 0%, transparent 70%);
+      color: #fff;
+      font-family: var(--font-f1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ÜST BAR (NAV) */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; background: rgba(21, 21, 30, 0.95);
+      border-bottom: 2px solid var(--odtu-red);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50; flex-wrap: wrap; gap: 12px;
+    }
+
+    .brand-group { display: flex; align-items: center; gap: 12px; }
+    .brand-badge {
+      background: var(--odtu-red); color: white; font-family: var(--font-display);
+      font-weight: 900; font-size: 1rem; padding: 4px 12px; border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .brand-title { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; font-style: italic; }
+
+    .nav-tabs { display: flex; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 8px; gap: 4px; }
+    .tab-btn {
+      background: transparent; border: none; color: #94a3b8; padding: 8px 16px;
+      font-family: var(--font-f1); font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; border-radius: 4px; transition: 0.2s; text-transform: uppercase;
+    }
+    .tab-btn.active { background: var(--f1-red); color: #fff; }
+
+    .sync-group {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .sync-group span { font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    #syncCode {
+      background: transparent; border: none; color: var(--racing-gold); font-family: var(--font-display);
+      font-weight: 700; width: 65px; text-align: center; outline: none; font-size: 1rem;
+    }
+    .sync-status { font-size: 0.75rem; font-weight: 700; min-width: 65px; }
+
+    .tool-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
+      padding: 8px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.15); }
+    
+    #adminEditBtn { display: none; background: rgba(245, 158, 11, 0.2); border-color: var(--racing-gold); color: var(--racing-gold); }
+    #adminEditBtn.editing { background: var(--racing-gold); color: #000; }
+
+    /* GÖRÜNÜM TAŞIYICI */
+    .view-container { flex: 1; display: none; flex-direction: column; position: relative; }
+    .view-container.active { display: flex; }
+
+    /* =========================================
+       TABLET (ARENA) MODU
+       ========================================= */
+    .tablet-screen {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+    }
+
+    .entry-card {
+      background: var(--f1-dark); border-top: 4px solid var(--odtu-red);
+      border-radius: 8px; padding: 40px 32px; width: 100%; max-width: 440px;
+      text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+    .entry-card h2 { font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 8px; font-style: italic; }
+    .entry-card p { color: #94a3b8; margin-bottom: 24px; }
+    
+    .error-text { color: #ef4444; font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; display: none; }
+
+    .input-field {
+      width: 100%; background: #0a0c10; border: 2px solid #2d3342; border-radius: 6px;
+      padding: 16px; font-size: 1.25rem; font-family: var(--font-f1); font-weight: 700;
+      color: #fff; text-align: center; text-transform: uppercase; margin-bottom: 20px; outline: none;
+    }
+    .input-field:focus { border-color: var(--odtu-red); }
+
+    .start-btn {
+      width: 100%; background: var(--odtu-red); color: #fff; border: none; border-radius: 6px;
+      padding: 16px; font-family: var(--font-display); font-weight: 800; font-size: 1.2rem;
+      cursor: pointer; text-transform: uppercase; font-style: italic;
+    }
+    .start-btn:active { transform: scale(0.98); }
+
+    /* Işık Paneli */
+    .game-arena { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    
+    .current-pilot-badge {
+      background: var(--f1-dark); border-left: 4px solid var(--odtu-red); padding: 8px 24px;
+      font-size: 1.2rem; font-weight: 700; text-transform: uppercase; font-style: italic; margin-bottom: 30px;
+    }
+
+    .f1-gantry {
+      display: flex; gap: 16px; background: #000; padding: 24px 32px; border-radius: 12px;
+      border: 2px solid #2d3342; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+    }
+    .light-pod { display: flex; flex-direction: column; gap: 12px; background: #15151e; padding: 12px; border-radius: 8px; }
+    .f1-bulb {
+      width: 60px; height: 60px; border-radius: 50%; background: #2a2c33;
+      border: 2px solid #111; box-shadow: inset 0 4px 8px rgba(0,0,0,0.8);
+    }
+    .f1-bulb.active {
+      background: var(--f1-red); border-color: #ff7b77;
+      box-shadow: 0 0 40px var(--f1-glow), inset 0 0 15px #fff;
+    }
+
+    /* Dokunma Alanı (Touch-action none çok kritik) */
+    .tap-field {
+      width: 100%; max-width: 800px; height: 260px; margin-top: 40px;
+      background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; touch-action: none; -webkit-touch-callout: none;
+    }
+    .tap-field.ready { border: 3px solid #22c55e; background: rgba(34,197,94,0.1); }
+    .tap-text-main { font-family: var(--font-display); font-size: 1.8rem; font-weight: 900; }
+    .tap-text-sub { color: #94a3b8; font-weight: 600; margin-top: 8px; }
+
+    /* Sonuç Kartı */
+    .result-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+      display: flex; align-items: center; justify-content: center; z-index: 40;
+    }
+    .result-card {
+      background: var(--f1-dark); border-top: 5px solid var(--odtu-red);
+      padding: 40px 30px; width: 100%; max-width: 480px; text-align: center;
+    }
+    .result-ms-score { font-family: var(--font-display); font-size: 5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
+    .result-ms-score span { font-size: 1.5rem; color: var(--odtu-red); }
+    
+    .action-row { display: flex; gap: 12px; margin-top: 20px; }
+    .action-btn {
+      flex: 1; padding: 14px; font-family: var(--font-f1); font-weight: 700; font-size: 1.1rem;
+      border-radius: 6px; cursor: pointer; text-transform: uppercase; font-style: italic;
+    }
+    .btn-replay { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-next { background: var(--odtu-red); color: #fff; border: none; }
+
+    /* =========================================
+       TV MODU (F1 BROADCAST GRAPHICS)
+       ========================================= */
+    .tv-screen {
+      flex: 1; padding: 30px 40px; max-width: 1400px; width: 100%; margin: 0 auto; display: flex; flex-direction: column;
+    }
+    
+    /* İstatistikler */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+    .stat-box {
+      background: var(--f1-dark); border-left: 4px solid var(--silver); padding: 16px 20px;
+    }
+    .stat-label { font-size: 0.85rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-val { font-family: var(--font-display); font-size: 2rem; font-weight: 900; margin-top: 4px; }
+
+    /* F1 Liderlik Tablosu */
+    .f1-board-container { background: transparent; flex: 1; }
+    .f1-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; text-align: left; }
+    
+    .f1-table th {
+      color: #94a3b8; font-size: 0.85rem; font-weight: 700; padding: 0 16px 8px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; font-style: italic;
+    }
+    
+    .f1-table tr.driver-row { background: var(--f1-dark); transition: transform 0.2s; }
+    .f1-table td { padding: 14px 16px; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; font-style: italic; }
+    
+    /* F1 Renklendirmeleri */
+    .pos-col { width: 60px; font-family: var(--font-display); border-left: 4px solid var(--silver); }
+    .driver-col { color: #fff; letter-spacing: 1px; }
+    .time-col { font-family: var(--font-display); text-align: right; width: 150px; }
+    .gap-col { font-family: var(--font-display); text-align: right; width: 120px; color: #94a3b8; font-size: 1rem !important; }
+    .action-col { width: 60px; text-align: center; display: none; } /* Admin silme kolonu */
+
+    /* Podyum Renkleri */
+    .rank-1 .pos-col { border-left-color: var(--racing-gold); color: var(--racing-gold); }
+    .rank-2 .pos-col { border-left-color: #cbd5e1; }
+    .rank-3 .pos-col { border-left-color: var(--bronze); color: var(--bronze); }
+    .rank-1 .time-col { color: var(--f1-purple); } /* Mor sektör / Hızlı tur F1 mantığı */
+
+    .admin-mode-active .action-col { display: table-cell; }
+    .delete-btn {
+      background: #ef4444; color: white; border: none; padding: 6px 10px;
+      border-radius: 4px; font-weight: 900; cursor: pointer;
+    }
+
+    .empty-msg { text-align: center; padding: 40px; color: #64748b; font-size: 1.2rem; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <!-- ÜST KONTROL ÇUBUĞU -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <div class="brand-badge">METU</div>
+      <div class="brand-title">Formula Racing</div>
+    </div>
+
+    <!-- Mod Değiştirici -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tabTablet" onclick="switchView('tablet')">Pilot Tableti</button>
+      <button class="tab-btn" id="tabTV" onclick="switchView('tv')">F1 Skorbord</button>
+    </div>
+
+    <!-- Senkronizasyon -->
+    <div class="sync-group">
+      <span>Oda:</span>
+      <input type="text" id="syncCode" value="METU26" onchange="updateSyncRoom()">
+      <div id="syncStatus" class="sync-status">🟡 Yükleniyor</div>
+    </div>
+
+    <!-- Araçlar -->
+    <div class="tool-actions">
+      <button class="icon-btn" onclick="toggleMute()" id="muteBtn" title="Sesi Aç/Kapat">🔊</button>
+      <button class="icon-btn" onclick="exportCSV()" title="Skorları İndir">📥 Excel</button>
+      <!-- Sadece Admin Cihaz Görecek -->
+      <button class="icon-btn" id="adminEditBtn" onclick="toggleAdminEditMode()" title="Sürücü Kaldırma Modu">🛠️ Düzenle (Admin)</button>
+    </div>
+  </header>
+
+  <!-- 1. PİLOT TABLETİ EKRANI -->
+  <main class="view-container active" id="viewTablet">
+    <div class="tablet-screen">
+      
+      <!-- Kayıt -->
+      <div class="entry-card" id="stepEntry">
+        <h2>PİLOT GİRİŞİ</h2>
+        <p>Refleksini test et, adını liderlik tablosuna yazdır.</p>
+        
+        <div id="errNick" class="error-text">⚠️ Bu isim zaten kullanımda!</div>
+        <div id="errProf" class="error-text">⚠️ Lütfen uygun bir isim giriniz.</div>
+        
+        <input type="text" id="pilotNickname" class="input-field" placeholder="Sürücü Adı" maxlength="15" autocomplete="off">
+        <button class="start-btn" onclick="startDriverSession()">Kokpite Geç</button>
+      </div>
+
+      <!-- Işıklar (Arena) -->
+      <div class="game-arena" id="stepArena" style="display: none;">
+        <div class="current-pilot-badge">PİLOT: <span id="displayPilotName" style="color:var(--racing-gold);"></span></div>
+
+        <div class="f1-gantry">
+          <div class="light-pod"><div class="f1-bulb" id="b1_1"></div><div class="f1-bulb" id="b1_2"></div></div>
+          <div class="light-pod"><div class="f1-bulb" id="b2_1"></div><div class="f1-bulb" id="b2_2"></div></div>
+          <div class="light-pod"><div class="f1-bulb" id="b3_1"></div><div class="f1-bulb" id="b3_2"></div></div>
+          <div class="light-pod"><div class="f1-bulb" id="b4_1"></div><div class="f1-bulb" id="b4_2"></div></div>
+          <div class="light-pod"><div class="f1-bulb" id="b5_1"></div><div class="f1-bulb" id="b5_2"></div></div>
+        </div>
+
+        <!-- Dokunmatik Hata Önleyici: ontouchstart -->
+        <div class="tap-field" id="tapField" ontouchstart="handleTouch(event)" onmousedown="handleTouch(event)">
+          <div class="tap-text-main" id="tapNotice">IŞIKLARI BEKLE</div>
+          <div class="tap-text-sub" id="tapSub">Söndüğü an ekrana dokun</div>
+        </div>
+      </div>
+
+      <!-- Sonuç -->
+      <div class="result-overlay" id="stepResult" style="display: none;">
+        <div class="result-card">
+          <div class="result-pilot-name" id="resPilotName">PİLOT</div>
+          
+          <div id="validScoreBox">
+            <div class="result-ms-score"><span id="resMsVal">000</span><span>ms</span></div>
+            <div id="pbText" style="color: #22c55e; font-weight: 700; margin-bottom: 10px;"></div>
+          </div>
+          
+          <div id="jumpStartBox" style="display: none;">
+            <div class="result-ms-score" style="color: var(--f1-red); font-size:3rem;">JUMP START</div>
+            <p style="color: #94a3b8; margin: 10px 0;">Erken çıkış yaptın, derece geçersiz.</p>
+          </div>
+          
+          <div class="action-row">
+            <button class="action-btn btn-replay" onclick="playAgain()">Tekrar Dene</button>
+            <button class="action-btn btn-next" onclick="resetToNewDriver()">Sıradaki Pilot</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 2. CANLI SKOR TABLOSU (F1 EKRANI) -->
+  <main class="view-container" id="viewTV">
+    <div class="tv-screen">
+      <!-- İstatistikler -->
+      <section class="stats-row">
+        <div class="stat-box">
+          <span class="stat-label">Fastest Lap</span>
+          <div class="stat-val" style="color: var(--f1-purple);" id="statBest">-- <span>ms</span></div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Ortalama Refleks</span>
+          <div class="stat-val" id="statAvg">-- <span>ms</span></div>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Sürücü Sayısı</span>
+          <div class="stat-val" id="statCount">0</div>
+        </div>
+      </section>
+
+      <!-- Tablo -->
+      <section class="f1-board-container">
+        <table class="f1-table" id="f1Table">
+          <thead>
+            <tr>
+              <th class="pos-col">POS</th>
+              <th>DRIVER</th>
+              <th class="time-col">TIME</th>
+              <th class="gap-col">GAP</th>
+              <th class="action-col">DEL</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- JS dolduracak -->
+          </tbody>
+        </table>
+        <div id="emptyTableMsg" class="empty-msg">Henüz seans başlamadı.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    /* ============================================================
+       VERİTABANI, ADMIN VE BULUT (P2P) SİSTEMİ
+       ============================================================ */
+    const STORAGE_KEY = 'METU_RACING_F1';
+    const myDeviceId = Math.random().toString(36).substring(2, 9);
+    
+    let syncEventSource = null;
+    let currentRoomId = "";
+    
+    // Otomatik Admin Mantığı: Odayı (Local) ilk oluşturan admindir.
+    let isAdmin = false;
+    let isEditMode = false;
+
+    function getScores() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    
+    function saveLocallyOnly(list) {
+      list.sort((a, b) => a.reactionMs - b.reactionMs);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      renderLeaderboard();
+    }
+
+    function broadcast(payload) {
+      if(!currentRoomId) return;
+      payload.sender = myDeviceId;
+      fetch(`https://ntfy.sh/${currentRoomId}`, { method: 'POST', body: JSON.stringify(payload) }).catch(()=>{});
+    }
+
+    function initSync() {
+      const code = document.getElementById('syncCode').value.trim();
+      const st = document.getElementById('syncStatus');
+      const adminBtn = document.getElementById('adminEditBtn');
+      if (!code) return;
+      
+      currentRoomId = "metu_f1_" + code;
+      if (syncEventSource) syncEventSource.close();
+      
+      st.innerHTML = "🟡"; st.style.color = "#fbbf24";
+      
+      // Admin kontrolü: Daha önce bu odada admin olduysak hatırlayalım
+      if (localStorage.getItem('adminRoom') === currentRoomId) {
+          enableAdminFeatures();
+      } else {
+          // Varsayılan olarak admin değiliz, eğer kimseden cevap gelmezse admin olacağız.
+          isAdmin = false;
+          adminBtn.style.display = 'none';
+      }
+
+      let dataReceived = false;
+
+      try {
+        syncEventSource = new EventSource(`https://ntfy.sh/${currentRoomId}/sse`);
+        
+        syncEventSource.onopen = () => {
+          st.innerHTML = "🟢 LİVE"; st.style.color = "#22c55e";
+          // Odaya girince herkesten verileri iste
+          setTimeout(() => { broadcast({ type: 'REQ_SYNC' }); }, 800);
+          
+          // Eğer 2.5 saniye içinde kimse veri göndermezse, odada ilk biz varız demektir -> Admin Ol.
+          setTimeout(() => {
+              if(!dataReceived && localStorage.getItem('adminRoom') !== currentRoomId) {
+                  localStorage.setItem('adminRoom', currentRoomId);
+                  enableAdminFeatures();
+              }
+          }, 2500);
+        };
+
+        syncEventSource.onmessage = (e) => {
+          const data = JSON.parse(e.data);
+          if(data.event === 'message') {
+            try {
+              const p = JSON.parse(data.message);
+              if (p.sender === myDeviceId) return; // Kendi mesajımız
+              
+              if (p.type === 'NEW_SCORE' || p.type === 'SYNC_DATA') dataReceived = true;
+              handleP2P(p);
+            } catch(err) {}
+          }
+        };
+      } catch(e) {}
+    }
+
+    function enableAdminFeatures() {
+        isAdmin = true;
+        document.getElementById('adminEditBtn').style.display = 'block';
+    }
+
+    function handleP2P(p) {
+      let scores = getScores();
+      if (p.type === 'NEW_SCORE') {
+        const idx = scores.findIndex(s => s.id === p.score.id);
+        if (idx !== -1) { if(p.score.reactionMs < scores[idx].reactionMs) scores[idx] = p.score; } 
+        else { scores.push(p.score); }
+        saveLocallyOnly(scores);
+      } 
+      else if (p.type === 'REMOVE_SCORE') {
+        scores = scores.filter(s => s.id !== p.targetId);
+        saveLocallyOnly(scores);
+      }
+      else if (p.type === 'REQ_SYNC') {
+        if (scores.length > 0) broadcast({ type: 'SYNC_DATA', data: scores });
+      } 
+      else if (p.type === 'SYNC_DATA') {
+        let map = new Map();
+        scores.forEach(s => map.set(s.id, s));
+        p.data.forEach(s => map.set(s.id, s));
+        saveLocallyOnly(Array.from(map.values()));
+      }
+    }
+
+    function updateSyncRoom() {
+        localStorage.removeItem('adminRoom'); // Oda değişirse adminlik sıfırlanır
+        initSync(); 
+    }
+    window.addEventListener('load', initSync);
+
+    /* ============================================================
+       ADMIN SÜRÜCÜ KALDIRMA MODU
+       ============================================================ */
+    function toggleAdminEditMode() {
+        if(!isAdmin) return;
+        isEditMode = !isEditMode;
+        
+        const btn = document.getElementById('adminEditBtn');
+        const table = document.getElementById('f1Table');
+        
+        if(isEditMode) {
+            btn.classList.add('editing');
+            btn.innerText = "❌ Düzenlemeyi Kapat";
+            table.classList.add('admin-mode-active');
+        } else {
+            btn.classList.remove('editing');
+            btn.innerText = "🛠️ Düzenle (Admin)";
+            table.classList.remove('admin-mode-active');
+        }
+    }
+
+    function deleteDriver(id, name) {
+        if(!isAdmin) return;
+        if(confirm(`"${name}" isimli sürücüyü silmek istediğinize emin misiniz?`)) {
+            let scores = getScores().filter(s => s.id !== id);
+            saveLocallyOnly(scores);
+            broadcast({ type: 'REMOVE_SCORE', targetId: id });
+        }
+    }
+
+    /* ============================================================
+       OYNANIŞ MANTIĞI & ARENA
+       ============================================================ */
+    let currentPilot = ''; let currentPilotId = ''; let pbMs = 0; let isPB = false;
+    let gameState = 'IDLE'; let timers = []; let randTimer = null; let lightsOffTime = 0;
+    
+    // Ses
+    let audioCtx = null; let isMuted = false;
+    function playBeep(freq, dur, type='sine') {
+      if(isMuted) return;
+      try {
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        g.gain.setValueAtTime(0.2, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + dur);
+      } catch(e){}
+    }
+    function toggleMute() { isMuted = !isMuted; document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊'; }
+
+    // İsim Filtresi (Küfür ve Tekillik)
+    function checkName(name) {
+      const lower = name.toLowerCase().replace(/[^a-z0-9çğıöşü]/g, '');
+      const bad = ["amk","yarrak","orospu","amcik","fuck","bitch","pussy","pezevenk","ibne","yavsak","serefsiz","kahpe","pic","göt","salak","aptal"];
+      for (let b of bad) if (lower.includes(b)) return false;
+      return true;
+    }
+
+    document.getElementById('pilotNickname').addEventListener('keydown', e => { if(e.key==='Enter') startDriverSession(); });
+
+    function startDriverSession() {
+      const inp = document.getElementById('pilotNickname'); const name = inp.value.trim();
+      document.getElementById('errNick').style.display = 'none'; document.getElementById('errProf').style.display = 'none';
+      if(!name) { inp.style.borderColor = 'var(--f1-red)'; setTimeout(()=>inp.style.borderColor='', 1000); return; }
+      if(!checkName(name)) { document.getElementById('errProf').style.display = 'block'; return; }
+      
+      const scores = getScores();
+      if(scores.some(s => s.pilotName.toLowerCase() === name.toLowerCase())) { document.getElementById('errNick').style.display = 'block'; return; }
+
+      currentPilot = name;
+      currentPilotId = "DRV_" + Date.now().toString();
+      document.getElementById('displayPilotName').innerText = currentPilot;
+      
+      document.getElementById('stepEntry').style.display = 'none';
+      document.getElementById('stepResult').style.display = 'none';
+      document.getElementById('stepArena').style.display = 'flex';
+      startLights();
+    }
+
+    function playAgain() {
+      document.getElementById('stepResult').style.display = 'none';
+      document.getElementById('stepArena').style.display = 'flex';
+      startLights();
+    }
+
+    function resetToNewDriver() {
+      clearAllTimers();
+      currentPilot = ''; currentPilotId = '';
+      document.getElementById('pilotNickname').value = '';
+      document.getElementById('stepResult').style.display = 'none';
+      document.getElementById('stepArena').style.display = 'none';
+      document.getElementById('stepEntry').style.display = 'block';
+    }
+
+    // F1 Işık Sekansı
+    function setCol(c, st) { document.getElementById(`b${c}_1`).classList.toggle('active', st); document.getElementById(`b${c}_2`).classList.toggle('active', st); }
+    function clearLights() { for(let i=1;i<=5;i++) setCol(i, false); }
+    function clearAllTimers() { timers.forEach(t=>clearTimeout(t)); timers=[]; if(randTimer) clearTimeout(randTimer); clearLights(); }
+
+    function startLights() {
+      clearAllTimers(); gameState = 'LIGHTS_ON';
+      const tf = document.getElementById('tapField'); tf.classList.remove('ready');
+      document.getElementById('tapNotice').innerText = "IŞIKLARI BEKLE";
+      
+      for(let i=1; i<=5; i++) {
+        timers.push(setTimeout(() => {
+          setCol(i, true); playBeep(720, 0.08);
+          if(i===5) {
+            gameState = 'WAITING';
+            randTimer = setTimeout(() => {
+              clearLights(); lightsOffTime = performance.now(); gameState = 'GO';
+              playBeep(1200, 0.12, 'triangle');
+              tf.classList.add('ready'); document.getElementById('tapNotice').innerText = "DOKUN!";
+            }, 1000 + Math.random() * 2200);
+          }
+        }, i*1000));
+      }
+    }
+
+    // Dokunmatik & Tıklama (Double Fire korumalı)
+    let lastTap = 0;
+    function handleTouch(e) {
+      if(e) e.preventDefault();
+      let now = Date.now(); if(now - lastTap < 200) return; lastTap = now;
+      
+      if(gameState === 'LIGHTS_ON' || gameState === 'WAITING') {
+        clearAllTimers(); gameState = 'DONE'; playBeep(220, 0.4, 'sawtooth');
+        showResult(null, true);
+      } else if (gameState === 'GO') {
+        let ms = Math.round(performance.now() - lightsOffTime);
+        gameState = 'DONE'; playBeep(880, 0.1, 'sine');
+        processScore(ms); showResult(ms, false);
+      }
+    }
+
+    function processScore(ms) {
+      let list = getScores(); let ex = list.find(s=>s.id === currentPilotId);
+      let sItem; let isUpdate = false;
+      
+      if(ex) {
+        if(ms < ex.reactionMs) {
+          ex.reactionMs = ms; ex.timestamp = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+          sItem = ex; isUpdate = true; isPB = true; pbMs = ms;
+        } else { isPB = false; pbMs = ex.reactionMs; }
+      } else {
+        sItem = { id: currentPilotId, pilotName: currentPilot, reactionMs: ms, timestamp: new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) };
+        list.push(sItem); isUpdate = true; isPB = true; pbMs = ms;
+      }
+      if(isUpdate) { saveLocallyOnly(list); broadcast({ type:'NEW_SCORE', score: sItem }); }
+    }
+
+    function showResult(ms, isJump) {
+      document.getElementById('resPilotName').innerText = currentPilot;
+      document.getElementById('stepResult').style.display = 'flex';
+      
+      if(isJump) {
+        document.getElementById('validScoreBox').style.display = 'none';
+        document.getElementById('jumpStartBox').style.display = 'block';
+      } else {
+        document.getElementById('validScoreBox').style.display = 'block';
+        document.getElementById('jumpStartBox').style.display = 'none';
+        document.getElementById('resMsVal').innerText = ms;
+        
+        let pb = document.getElementById('pbText');
+        if(isPB) pb.innerHTML = "🎉 YENİ KİŞİSEL REKOR!";
+        else pb.innerHTML = `<span style="color:#94a3b8">Kişisel En İyi: ${pbMs} ms</span>`;
+      }
+    }
+    
+    // Klavye desteği
+    window.addEventListener('keydown', e => { if(e.code==='Space') handleTouch(e); });
+
+    /* ============================================================
+       CANLI SKOR & F1 RENDER
+       ============================================================ */
+    function renderLeaderboard() {
+      const scores = getScores();
+      const tbody = document.getElementById('leaderboardBody');
+      const emptyMsg = document.getElementById('emptyTableMsg');
+
+      document.getElementById('statCount').innerText = scores.length;
+      if (scores.length > 0) {
+        document.getElementById('statBest').innerHTML = `${scores[0].reactionMs} <span>ms</span>`;
+        let t = scores.reduce((s, x) => s + x.reactionMs, 0);
+        document.getElementById('statAvg').innerHTML = `${Math.round(t / scores.length)} <span>ms</span>`;
+      } else {
+        document.getElementById('statBest').innerHTML = `-- <span>ms</span>`;
+        document.getElementById('statAvg').innerHTML = `-- <span>ms</span>`;
+      }
+
+      tbody.innerHTML = '';
+      if(scores.length === 0) { emptyMsg.style.display = 'block'; return; }
+      emptyMsg.style.display = 'none';
+
+      let leaderMs = scores[0].reactionMs;
+
+      scores.forEach((item, i) => {
+        let gapStr = (i === 0) ? "LEADER" : `+${item.reactionMs - leaderMs} ms`;
+        
+        let row = document.createElement('tr');
+        row.className = `driver-row rank-${i+1}`;
+        row.innerHTML = `
+          <td class="pos-col">${i + 1}</td>
+          <td class="driver-col">${item.pilotName}</td>
+          <td class="time-col">${item.reactionMs}</td>
+          <td class="gap-col">${gapStr}</td>
+          <td class="action-col">
+            <button class="delete-btn" onclick="deleteDriver('${item.id}', '${item.pilotName}')">X</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function switchView(mode) {
+      document.getElementById('tabTablet').classList.toggle('active', mode === 'tablet');
+      document.getElementById('tabTV').classList.toggle('active', mode === 'tv');
+      document.getElementById('viewTablet').classList.toggle('active', mode === 'tablet');
+      document.getElementById('viewTV').classList.toggle('active', mode === 'tv');
+      if (mode === 'tv') renderLeaderboard();
+    }
+
+    function exportCSV() {
+      const list = getScores(); if(!list.length) return alert("Veri yok!");
+      let csv = "Pozisyon,Pilot,Sure (ms),Fark,Saat\n";
+      let leader = list[0].reactionMs;
+      list.forEach((x, i) => { csv += `${i+1},"${x.pilotName}",${x.reactionMs},${i===0?0:(x.reactionMs-leader)},"${x.timestamp}"\n`; });
+      let url = URL.createObjectURL(new Blob(["\uFEFF" + csv], {type:'text/csv;charset=utf-8;'}));
+      let a = document.createElement('a'); a.href = url; a.download = `METU_F1_Scores.csv`; a.click();
+    }
+
+    renderLeaderboard();
+  </script>
+</body>
+</html>
